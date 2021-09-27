@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Company Information</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../static/css/styles.css"/>
+    <script src="../static/js/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="page-container">
+    <div class="container">
+        <h1 class="display-4">Company Information</h1>
+        <hr>
+        <h5>Search if the company is restricted</h5>
+        <div class="row mt-5 mb-3 align-items-center">
+            <div class="col-md-2">
+                <span>Business Number:</span>
+            </div>
+            <div class="col-md-4">
+                <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Search if restricted"
+                        id="searchField"
+                />
+            </div>
+            <div class="col-md-2">
+                <button
+                        class="btn btn-primary btn-sm"
+                        id="search"
+                >
+                    Search
+                </button>
+            </div>
+            <div class="col-md-4 text-right">
+                <button class="btn btn-primary btn-sm" id="showRestricted">
+                    Show restricted
+                </button>
+                <button class="btn btn-primary btn-sm" id="showAll">
+                    Show all
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 warning d-none">
+                <span>Business Number should only contain numbers and hyphen!</span>
+            </div>
+        </div>
+
+        <div id="root"></div>
+    </div>
+</div>
+
+<script src="../static/js/data.js"></script>
+<script src="../static/js/table-sortable.js"></script>
+<script>
+    const table = $("#root").tableSortable({
+        data: [],
+        columns: columns,
+        rowsPerPage: 100,
+        pagination: true,
+    });
+
+    const search = $("#search");
+    const searchField = $("#searchField");
+    // Search for the business number
+    search.on("click", function () {
+        const regEx = /^[0-9]+-?[0-9]+$/;
+        if (!searchField.val().match(regEx)) {
+            searchField.css("border-color", "red");
+            $(".warning").removeClass("d-none");
+        } else {
+            searchField.css("border-color", "#ced4da");
+            $(".warning").addClass("d-none");
+            $.get(`/checkRestricted/${searchField.val()}`, function (data) {
+                if (data.restricted === null) {
+                    alert("Sorry, the company doesn't exist.");
+                } else if (data.restricted) {
+                    confirm("The company is restricted.")
+                } else {
+                    confirm("The company is not restricted.")
+                }
+            })
+                .fail(function () {
+                    alert("Errors. Please try again.");
+                })
+        }
+    });
+
+    // Search for restricted companies
+    const showRestricted = $("#showRestricted");
+    showRestricted.on("click", function () {
+        $.get('/getRestricted', function (data) {
+            $("#root").tableSortable({
+                data: data.restrictedCompanies,
+                columns: columns,
+                rowsPerPage: 100,
+                pagination: true,
+            });
+        })
+            .fail(function () {
+                alert("Errors. Please try again.");
+            })
+    });
+
+    // Search for all companies
+    const showAll = $("#showAll");
+    showAll.on("click", function () {
+        $.get('/getCompanies', function (data) {
+            $("#root").tableSortable({
+                data: data.companies,
+                columns: columns,
+                rowsPerPage: 100,
+                pagination: true,
+            });
+        })
+            .fail(function () {
+                alert("Errors. Please try again.");
+            })
+    });
+
+    window.onload = function () {
+        showAll.click()
+    };
+</script>
+</body>
+</html>
