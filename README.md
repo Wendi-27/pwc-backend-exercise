@@ -14,6 +14,7 @@ The codebase is implemented in Python 3.6.8. Required packages are:
 
     cd pwc-backend-exercise
     pip install -r requirements.txt
+    python init_database.py
     Mac/Linux OS:
         export FLASK_APP=main 
         export FLASK_ENV=development
