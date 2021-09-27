@@ -26,6 +26,7 @@ The codebase is implemented in Python 3.6.8. Required packages are:
 ### Deploy on Google Cloud Platform 
 
     cd pwc-backend-exercise
+    python init_database.py
     gcloud app deploy      
           
       
